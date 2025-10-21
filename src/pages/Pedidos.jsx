@@ -27,8 +27,11 @@ import {
   InputLabel,
   Grid,
   Divider,
+  useMediaQuery,
+  useTheme,
+  Stack,
 } from '@mui/material'
-import { Add, Visibility, Delete, RemoveCircle } from '@mui/icons-material'
+import { Add, Visibility, Delete, RemoveCircle, Phone, CalendarToday } from '@mui/icons-material'
 import {
   pedidoService,
   clienteService,
@@ -38,6 +41,9 @@ import {
 import { formatCurrency, formatDate, getEstadoColor, getEstadoTexto } from '../utils/formatters'
 
 const Pedidos = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  
   const [pedidos, setPedidos] = useState([])
   const [clientes, setClientes] = useState([])
   const [productos, setProductos] = useState([])
@@ -186,67 +192,146 @@ const Pedidos = () => {
         </Alert>
       )}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>ID</strong></TableCell>
-              <TableCell><strong>Cliente</strong></TableCell>
-              <TableCell><strong>Fecha Horneado</strong></TableCell>
-              <TableCell><strong>Estado</strong></TableCell>
-              <TableCell align="right"><strong>Total</strong></TableCell>
-              <TableCell align="right"><strong>Acciones</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {pedidos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
+      {/* Vista móvil - Cards */}
+      {isMobile ? (
+        <Stack spacing={2}>
+          {pedidos.length === 0 ? (
+            <Card>
+              <CardContent>
+                <Typography align="center" color="text.secondary">
                   No hay pedidos registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              pedidos.map((pedido) => (
-                <TableRow key={pedido.id}>
-                  <TableCell>#{pedido.id}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{pedido.cliente_nombre}</Typography>
-                    <Typography variant="caption" color="text.secondary">
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            pedidos.map((pedido) => (
+              <Card key={pedido.id} elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Pedido #{pedido.id}
+                      </Typography>
+                      <Chip
+                        label={getEstadoTexto(pedido.estado)}
+                        color={getEstadoColor(pedido.estado)}
+                        size="small"
+                      />
+                    </Box>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+                      {formatCurrency(pedido.total)}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 1.5 }} />
+
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                      <Phone fontSize="small" />
+                      {pedido.cliente_nombre}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 3 }}>
                       {pedido.cliente_telefono}
                     </Typography>
-                  </TableCell>
-                  <TableCell>{formatDate(pedido.fecha_horneado)}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getEstadoTexto(pedido.estado)}
-                      color={getEstadoColor(pedido.estado)}
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <CalendarToday fontSize="small" />
+                      {formatDate(pedido.fecha_horneado)}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                    <Button
                       size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="right">{formatCurrency(pedido.total)}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
+                      variant="outlined"
                       color="info"
+                      startIcon={<Visibility />}
                       onClick={() => handleViewPedido(pedido.id)}
                     >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
+                      Ver
+                    </Button>
+                    <Button
                       size="small"
+                      variant="outlined"
                       color="error"
+                      startIcon={<Delete />}
                       onClick={() => handleDelete(pedido.id)}
                       disabled={pedido.estado === 'cancelado'}
                     >
-                      <Delete />
-                    </IconButton>
+                      Cancelar
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+      ) : (
+        /* Vista desktop - Tabla */
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>ID</strong></TableCell>
+                <TableCell><strong>Cliente</strong></TableCell>
+                <TableCell><strong>Fecha Horneado</strong></TableCell>
+                <TableCell><strong>Estado</strong></TableCell>
+                <TableCell align="right"><strong>Total</strong></TableCell>
+                <TableCell align="right"><strong>Acciones</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {pedidos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    No hay pedidos registrados
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                pedidos.map((pedido) => (
+                  <TableRow key={pedido.id}>
+                    <TableCell>#{pedido.id}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{pedido.cliente_nombre}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {pedido.cliente_telefono}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{formatDate(pedido.fecha_horneado)}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={getEstadoTexto(pedido.estado)}
+                        color={getEstadoColor(pedido.estado)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell align="right">{formatCurrency(pedido.total)}</TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        color="info"
+                        onClick={() => handleViewPedido(pedido.id)}
+                      >
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(pedido.id)}
+                        disabled={pedido.estado === 'cancelado'}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Dialog para crear pedido */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
