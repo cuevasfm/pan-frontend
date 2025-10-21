@@ -24,12 +24,20 @@ import {
   Select,
   FormControl,
   InputLabel,
+  useMediaQuery,
+  useTheme,
+  Stack,
+  Divider,
+  Chip,
 } from '@mui/material'
-import { Add, Edit, Delete } from '@mui/icons-material'
+import { Add, Edit, Delete, Category, AttachMoney, Inventory } from '@mui/icons-material'
 import { insumoService, unidadService } from '../services/api'
 import { formatCurrency } from '../utils/formatters'
 
 const Insumos = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  
   const [insumos, setInsumos] = useState([])
   const [unidades, setUnidades] = useState([])
   const [loading, setLoading] = useState(true)
@@ -157,57 +165,133 @@ const Insumos = () => {
         </Alert>
       )}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>Nombre</strong></TableCell>
-              <TableCell><strong>Unidad Base</strong></TableCell>
-              <TableCell align="right"><strong>Precio por Unidad</strong></TableCell>
-              <TableCell align="right"><strong>Stock</strong></TableCell>
-              <TableCell align="right"><strong>Acciones</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {insumos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
+      {/* Vista móvil - Cards */}
+      {isMobile ? (
+        <Stack spacing={2}>
+          {insumos.length === 0 ? (
+            <Card>
+              <CardContent>
+                <Typography align="center" color="text.secondary">
                   No hay insumos registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              insumos.map((insumo) => (
-                <TableRow key={insumo.id}>
-                  <TableCell>{insumo.nombre}</TableCell>
-                  <TableCell>{insumo.unidad_simbolo}</TableCell>
-                  <TableCell align="right">
-                    {formatCurrency(insumo.precio_por_unidad)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {insumo.stock_actual} {insumo.unidad_simbolo}
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            insumos.map((insumo) => (
+              <Card key={insumo.id} elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {insumo.nombre}
+                      </Typography>
+                      <Chip 
+                        label={insumo.unidad_simbolo} 
+                        size="small" 
+                        color="primary"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+                      {formatCurrency(insumo.precio_por_unidad)}
+                    </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 1.5 }} />
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <AttachMoney fontSize="small" />
+                      Precio por {insumo.unidad_simbolo}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Inventory fontSize="small" />
+                      Stock: {insumo.stock_actual} {insumo.unidad_simbolo}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                    <Button
                       size="small"
+                      variant="outlined"
                       color="primary"
+                      startIcon={<Edit />}
                       onClick={() => handleOpenDialog(insumo)}
                     >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
+                      Editar
+                    </Button>
+                    <Button
                       size="small"
+                      variant="outlined"
                       color="error"
+                      startIcon={<Delete />}
                       onClick={() => handleDelete(insumo.id)}
                     >
-                      <Delete />
-                    </IconButton>
+                      Eliminar
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+      ) : (
+        /* Vista desktop - Tabla */
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Nombre</strong></TableCell>
+                <TableCell><strong>Unidad Base</strong></TableCell>
+                <TableCell align="right"><strong>Precio por Unidad</strong></TableCell>
+                <TableCell align="right"><strong>Stock</strong></TableCell>
+                <TableCell align="right"><strong>Acciones</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {insumos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    No hay insumos registrados
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                insumos.map((insumo) => (
+                  <TableRow key={insumo.id}>
+                    <TableCell>{insumo.nombre}</TableCell>
+                    <TableCell>{insumo.unidad_simbolo}</TableCell>
+                    <TableCell align="right">
+                      {formatCurrency(insumo.precio_por_unidad)}
+                    </TableCell>
+                    <TableCell align="right">
+                      {insumo.stock_actual} {insumo.unidad_simbolo}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenDialog(insumo)}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(insumo.id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
