@@ -208,6 +208,25 @@ const Productos = () => {
     }
   }
 
+  // Obtener unidades compatibles según el insumo seleccionado
+  const getUnidadesCompatibles = () => {
+    if (!recetaData.nuevoItem.insumo_id) {
+      return unidades // Si no hay insumo seleccionado, mostrar todas
+    }
+
+    // Encontrar el insumo seleccionado
+    const insumoSeleccionado = insumos.find(
+      (insumo) => insumo.id === recetaData.nuevoItem.insumo_id
+    )
+
+    if (!insumoSeleccionado) {
+      return unidades
+    }
+
+    // Filtrar unidades por el tipo del insumo
+    return unidades.filter((unidad) => unidad.tipo === insumoSeleccionado.unidad_tipo)
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -417,15 +436,22 @@ const Productos = () => {
                 <InputLabel>Insumo</InputLabel>
                 <Select
                   value={recetaData.nuevoItem.insumo_id}
-                  onChange={(e) => setRecetaData({
-                    ...recetaData,
-                    nuevoItem: { ...recetaData.nuevoItem, insumo_id: e.target.value }
-                  })}
+                  onChange={(e) => {
+                    // Al cambiar el insumo, resetear la unidad seleccionada
+                    setRecetaData({
+                      ...recetaData,
+                      nuevoItem: { 
+                        ...recetaData.nuevoItem, 
+                        insumo_id: e.target.value,
+                        unidad_id: '' // Resetear unidad
+                      }
+                    })
+                  }}
                   label="Insumo"
                 >
                   {insumos.map((insumo) => (
                     <MenuItem key={insumo.id} value={insumo.id}>
-                      {insumo.nombre}
+                      {insumo.nombre} ({insumo.unidad_simbolo})
                     </MenuItem>
                   ))}
                 </Select>
@@ -454,8 +480,9 @@ const Productos = () => {
                     nuevoItem: { ...recetaData.nuevoItem, unidad_id: e.target.value }
                   })}
                   label="Unidad"
+                  disabled={!recetaData.nuevoItem.insumo_id}
                 >
-                  {unidades.map((unidad) => (
+                  {getUnidadesCompatibles().map((unidad) => (
                     <MenuItem key={unidad.id} value={unidad.id}>
                       {unidad.simbolo} ({unidad.nombre})
                     </MenuItem>
