@@ -54,7 +54,7 @@ const Login = () => {
                 🍞
               </Typography>
               <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-                Panadería Artesanal
+                Fermenta
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 Sistema de Gestión de Pedidos
@@ -97,18 +97,6 @@ const Login = () => {
                 {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </Button>
             </form>
-
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-              <Typography variant="caption" display="block" gutterBottom>
-                <strong>Credenciales de prueba:</strong>
-              </Typography>
-              <Typography variant="caption" display="block">
-                Teléfono: 5555555555
-              </Typography>
-              <Typography variant="caption" display="block">
-                Contraseña: admin123
-              </Typography>
-            </Box>
           </CardContent>
         </Card>
       </Container>
