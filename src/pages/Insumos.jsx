@@ -36,7 +36,7 @@ import { formatCurrency } from '../utils/formatters'
 
 const Insumos = () => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const [insumos, setInsumos] = useState([])
   const [unidades, setUnidades] = useState([])

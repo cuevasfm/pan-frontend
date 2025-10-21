@@ -30,7 +30,7 @@ import { formatCurrency, formatDate } from '../utils/formatters'
 
 const Reportes = () => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const [fechas, setFechas] = useState([])
   const [selectedFecha, setSelectedFecha] = useState('')

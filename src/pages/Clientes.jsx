@@ -38,7 +38,7 @@ import { clienteService } from '../services/api'
 
 const Clientes = () => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const [clientes, setClientes] = useState([])
   const [filteredClientes, setFilteredClientes] = useState([])

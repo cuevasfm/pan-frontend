@@ -34,7 +34,7 @@ import { formatDate } from '../utils/formatters'
 
 const FechasProduccion = () => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const [fechas, setFechas] = useState([])
   const [loading, setLoading] = useState(true)

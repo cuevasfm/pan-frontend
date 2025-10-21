@@ -43,7 +43,7 @@ import { formatCurrency, formatDate, getEstadoColor, getEstadoTexto } from '../u
 
 const Pedidos = () => {
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
   const [pedidos, setPedidos] = useState([])
   const [clientes, setClientes] = useState([])
