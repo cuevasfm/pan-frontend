@@ -45,6 +45,9 @@ const Pedidos = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   
+  // Debug temporal
+  console.log('🔍 isMobile:', isMobile, '| Ancho:', window.innerWidth)
+  
   const [pedidos, setPedidos] = useState([])
   const [clientes, setClientes] = useState([])
   const [productos, setProductos] = useState([])
