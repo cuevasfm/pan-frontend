@@ -28,11 +28,18 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useMediaQuery,
+  useTheme,
+  Stack,
+  Divider,
 } from '@mui/material'
 import { Add, Edit, Delete, Search, Phone, Person, Home, Lock, AdminPanelSettings } from '@mui/icons-material'
 import { clienteService } from '../services/api'
 
 const Clientes = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  
   const [clientes, setClientes] = useState([])
   const [filteredClientes, setFilteredClientes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -247,30 +254,26 @@ const Clientes = () => {
         </CardContent>
       </Card>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>Nombre</strong></TableCell>
-              <TableCell><strong>Teléfono</strong></TableCell>
-              <TableCell><strong>Domicilio</strong></TableCell>
-              {tabValue === 1 && <TableCell><strong>Rol</strong></TableCell>}
-              <TableCell align="right"><strong>Acciones</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredClientes.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={tabValue === 1 ? 5 : 4} align="center">
+      {/* Vista móvil - Cards */}
+      {isMobile ? (
+        <Stack spacing={2}>
+          {filteredClientes.length === 0 ? (
+            <Card>
+              <CardContent>
+                <Typography align="center" color="text.secondary">
                   No hay {tabValue === 0 ? 'clientes' : 'administradores'} registrados
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredClientes.map((cliente) => (
-                <TableRow key={cliente.id}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {cliente.nombre}
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredClientes.map((cliente) => (
+              <Card key={cliente.id} elevation={2}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        {cliente.nombre}
+                      </Typography>
                       {cliente.rol === 'admin' && (
                         <Chip 
                           icon={<AdminPanelSettings />}
@@ -280,40 +283,119 @@ const Clientes = () => {
                         />
                       )}
                     </Box>
-                  </TableCell>
-                  <TableCell>{cliente.telefono}</TableCell>
-                  <TableCell>{cliente.domicilio || '-'}</TableCell>
-                  {tabValue === 1 && (
-                    <TableCell>
-                      <Chip 
-                        label="Administrador" 
-                        color="primary" 
-                        size="small" 
-                      />
-                    </TableCell>
-                  )}
-                  <TableCell align="right">
-                    <IconButton
+                  </Box>
+
+                  <Divider sx={{ my: 1.5 }} />
+
+                  <Box sx={{ mb: 1.5 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                      <Phone fontSize="small" />
+                      {cliente.telefono}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Home fontSize="small" />
+                      {cliente.domicilio || 'Sin domicilio'}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                    <Button
                       size="small"
+                      variant="outlined"
                       color="primary"
+                      startIcon={<Edit />}
                       onClick={() => handleOpenDialog(cliente)}
                     >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
+                      Editar
+                    </Button>
+                    <Button
                       size="small"
+                      variant="outlined"
                       color="error"
+                      startIcon={<Delete />}
                       onClick={() => handleDelete(cliente.id)}
                     >
-                      <Delete />
-                    </IconButton>
+                      Eliminar
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+      ) : (
+        /* Vista desktop - Tabla */
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Nombre</strong></TableCell>
+                <TableCell><strong>Teléfono</strong></TableCell>
+                <TableCell><strong>Domicilio</strong></TableCell>
+                {tabValue === 1 && <TableCell><strong>Rol</strong></TableCell>}
+                <TableCell align="right"><strong>Acciones</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredClientes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={tabValue === 1 ? 5 : 4} align="center">
+                    No hay {tabValue === 0 ? 'clientes' : 'administradores'} registrados
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                filteredClientes.map((cliente) => (
+                  <TableRow key={cliente.id}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {cliente.nombre}
+                        {cliente.rol === 'admin' && (
+                          <Chip 
+                            icon={<AdminPanelSettings />}
+                            label="Admin" 
+                            size="small" 
+                            color="primary" 
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{cliente.telefono}</TableCell>
+                    <TableCell>{cliente.domicilio || '-'}</TableCell>
+                    {tabValue === 1 && (
+                      <TableCell>
+                        <Chip 
+                          label="Administrador" 
+                          color="primary" 
+                          size="small" 
+                        />
+                      </TableCell>
+                    )}
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenDialog(cliente)}
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(cliente.id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>

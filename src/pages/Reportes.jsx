@@ -21,12 +21,17 @@ import {
   Divider,
   Button,
   Chip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Print, Download } from '@mui/icons-material'
 import { reporteService, fechaProduccionService } from '../services/api'
 import { formatCurrency, formatDate } from '../utils/formatters'
 
 const Reportes = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  
   const [fechas, setFechas] = useState([])
   const [selectedFecha, setSelectedFecha] = useState('')
   const [reporte, setReporte] = useState(null)
@@ -138,50 +143,50 @@ const Reportes = () => {
               </Box>
 
               {/* Resumen de totales */}
-              <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} md={3}>
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid item xs={6} sm={6} md={3}>
               <Card elevation={2}>
-                <CardContent>
-                  <Typography color="text.secondary" gutterBottom variant="overline">
+                <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                  <Typography color="text.secondary" gutterBottom variant={isMobile ? "caption" : "overline"}>
                     Total Pedidos
                   </Typography>
-                  <Typography variant="h4">
+                  <Typography variant={isMobile ? "h5" : "h4"}>
                     {reporte.totales.total_pedidos}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <Card elevation={2}>
-                <CardContent>
-                  <Typography color="text.secondary" gutterBottom variant="overline">
-                    Productos a Hornear
+                <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                  <Typography color="text.secondary" gutterBottom variant={isMobile ? "caption" : "overline"}>
+                    Productos
                   </Typography>
-                  <Typography variant="h4">
+                  <Typography variant={isMobile ? "h5" : "h4"}>
                     {reporte.totales.total_productos}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <Card elevation={2}>
-                <CardContent>
-                  <Typography color="text.secondary" gutterBottom variant="overline">
+                <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                  <Typography color="text.secondary" gutterBottom variant={isMobile ? "caption" : "overline"}>
                     Costo Insumos
                   </Typography>
-                  <Typography variant="h4" color="error.main">
+                  <Typography variant={isMobile ? "h6" : "h4"} color="error.main">
                     {formatCurrency(reporte.totales.costo_insumos)}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={6} sm={6} md={3}>
               <Card elevation={2}>
-                <CardContent>
-                  <Typography color="text.secondary" gutterBottom variant="overline">
+                <CardContent sx={{ p: isMobile ? 2 : 3 }}>
+                  <Typography color="text.secondary" gutterBottom variant={isMobile ? "caption" : "overline"}>
                     Margen
                   </Typography>
-                  <Typography variant="h4" color="success.main">
+                  <Typography variant={isMobile ? "h6" : "h4"} color="success.main">
                     {formatCurrency(reporte.totales.margen_ganancia)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -198,12 +203,12 @@ const Reportes = () => {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 📦 Resumen de Productos
               </Typography>
-              <TableContainer>
-                <Table>
+              <TableContainer sx={{ maxHeight: isMobile ? 400 : 'none' }}>
+                <Table size={isMobile ? "small" : "medium"}>
                   <TableHead>
                     <TableRow>
                       <TableCell><strong>Producto</strong></TableCell>
-                      <TableCell align="center"><strong>Cantidad Total</strong></TableCell>
+                      <TableCell align="center"><strong>Cantidad</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -211,7 +216,7 @@ const Reportes = () => {
                       <TableRow key={producto.producto_id}>
                         <TableCell>{producto.producto_nombre}</TableCell>
                         <TableCell align="center">
-                          <Chip label={producto.cantidad_total} color="primary" />
+                          <Chip label={producto.cantidad_total} color="primary" size={isMobile ? "small" : "medium"} />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -225,37 +230,48 @@ const Reportes = () => {
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                🛒 Lista de Compras - Insumos Necesarios
+                🛒 Lista de Compras
               </Typography>
-              <TableContainer>
-                <Table>
+              <TableContainer sx={{ maxHeight: isMobile ? 400 : 'none' }}>
+                <Table size={isMobile ? "small" : "medium"}>
                   <TableHead>
                     <TableRow>
                       <TableCell><strong>Insumo</strong></TableCell>
                       <TableCell align="right"><strong>Cantidad</strong></TableCell>
-                      <TableCell align="right"><strong>Costo Total</strong></TableCell>
+                      {!isMobile && <TableCell align="right"><strong>Costo</strong></TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {reporte.insumos_necesarios.map((insumo) => (
                       <TableRow key={insumo.insumo_id}>
-                        <TableCell>{insumo.insumo_nombre}</TableCell>
+                        <TableCell>
+                          <Typography variant={isMobile ? "body2" : "body1"}>
+                            {insumo.insumo_nombre}
+                          </Typography>
+                          {isMobile && (
+                            <Typography variant="caption" color="text.secondary">
+                              {formatCurrency(insumo.costo_total)}
+                            </Typography>
+                          )}
+                        </TableCell>
                         <TableCell align="right">
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography variant={isMobile ? "body2" : "body2"} sx={{ fontWeight: 600 }}>
                             {insumo.cantidad.toFixed(2)} {insumo.unidad_simbolo}
                           </Typography>
                         </TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(insumo.costo_total)}
-                        </TableCell>
+                        {!isMobile && (
+                          <TableCell align="right">
+                            {formatCurrency(insumo.costo_total)}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={2} align="right">
-                        <strong>Total Costo Insumos:</strong>
+                      <TableCell colSpan={isMobile ? 1 : 2} align="right">
+                        <strong>Total:</strong>
                       </TableCell>
                       <TableCell align="right">
-                        <Typography variant="h6" color="error.main">
+                        <Typography variant={isMobile ? "body1" : "h6"} color="error.main" sx={{ fontWeight: 700 }}>
                           {formatCurrency(reporte.totales.costo_insumos)}
                         </Typography>
                       </TableCell>
@@ -318,14 +334,14 @@ const Reportes = () => {
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                   📋 Lista de Pedidos
                 </Typography>
-                <TableContainer>
+                <TableContainer sx={{ maxHeight: isMobile ? 400 : 'none' }}>
                   <Table size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell><strong>#</strong></TableCell>
                         <TableCell><strong>Cliente</strong></TableCell>
-                        <TableCell><strong>Teléfono</strong></TableCell>
-                        <TableCell><strong>Domicilio</strong></TableCell>
+                        {!isMobile && <TableCell><strong>Teléfono</strong></TableCell>}
+                        {!isMobile && <TableCell><strong>Domicilio</strong></TableCell>}
                         <TableCell align="right"><strong>Total</strong></TableCell>
                       </TableRow>
                     </TableHead>
@@ -333,9 +349,23 @@ const Reportes = () => {
                       {reporte.pedidos.map((pedido) => (
                         <TableRow key={pedido.id}>
                           <TableCell>{pedido.id}</TableCell>
-                          <TableCell>{pedido.cliente_nombre}</TableCell>
-                          <TableCell>{pedido.cliente_telefono}</TableCell>
-                          <TableCell>{pedido.domicilio}</TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {pedido.cliente_nombre}
+                            </Typography>
+                            {isMobile && (
+                              <>
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {pedido.cliente_telefono}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" display="block">
+                                  {pedido.domicilio}
+                                </Typography>
+                              </>
+                            )}
+                          </TableCell>
+                          {!isMobile && <TableCell>{pedido.cliente_telefono}</TableCell>}
+                          {!isMobile && <TableCell>{pedido.domicilio}</TableCell>}
                           <TableCell align="right">
                             {formatCurrency(pedido.total)}
                           </TableCell>

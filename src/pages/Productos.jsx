@@ -30,12 +30,17 @@ import {
   TableHead,
   TableRow,
   Paper,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Add, Edit, Delete, Visibility, Restaurant, RemoveCircle } from '@mui/icons-material'
 import { productoService, insumoService, unidadService } from '../services/api'
 import { formatCurrency } from '../utils/formatters'
 
 const Productos = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  
   const [productos, setProductos] = useState([])
   const [insumos, setInsumos] = useState([])
   const [unidades, setUnidades] = useState([])
@@ -287,43 +292,90 @@ const Productos = () => {
                       size="small"
                     />
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
                     {producto.descripcion || 'Sin descripción'}
                   </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                    <IconButton
-                      size="small"
-                      color="success"
-                      onClick={() => handleOpenRecetaDialog(producto.id)}
-                      title="Gestionar Receta"
-                    >
-                      <Restaurant />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="info"
-                      onClick={() => handleViewProducto(producto.id)}
-                      title="Ver Detalles"
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => handleOpenDialog(producto)}
-                      title="Editar"
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={() => handleDelete(producto.id)}
-                      title="Eliminar"
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Box>
+                  
+                  {isMobile ? (
+                    /* Botones grandes para móvil */
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="success"
+                        startIcon={<Restaurant />}
+                        onClick={() => handleOpenRecetaDialog(producto.id)}
+                        fullWidth
+                      >
+                        Receta
+                      </Button>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="info"
+                          startIcon={<Visibility />}
+                          onClick={() => handleViewProducto(producto.id)}
+                          fullWidth
+                        >
+                          Ver
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                          startIcon={<Edit />}
+                          onClick={() => handleOpenDialog(producto)}
+                          fullWidth
+                        >
+                          Editar
+                        </Button>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(producto.id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  ) : (
+                    /* IconButtons para desktop */
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => handleOpenRecetaDialog(producto.id)}
+                        title="Gestionar Receta"
+                      >
+                        <Restaurant />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="info"
+                        onClick={() => handleViewProducto(producto.id)}
+                        title="Ver Detalles"
+                      >
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenDialog(producto)}
+                        title="Editar"
+                      >
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(producto.id)}
+                        title="Eliminar"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -380,7 +432,13 @@ const Productos = () => {
       </Dialog>
 
       {/* Dialog para gestionar receta */}
-      <Dialog open={openRecetaDialog} onClose={handleCloseRecetaDialog} maxWidth="md" fullWidth>
+      <Dialog 
+        open={openRecetaDialog} 
+        onClose={handleCloseRecetaDialog} 
+        maxWidth="md" 
+        fullWidth
+        fullScreen={isMobile}
+      >
         <DialogTitle>
           Gestionar Receta - {recetaData.productoNombre}
         </DialogTitle>
