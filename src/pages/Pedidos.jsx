@@ -30,6 +30,7 @@ import {
   useMediaQuery,
   useTheme,
   Stack,
+  Autocomplete,
 } from '@mui/material'
 import { Add, Visibility, Delete, RemoveCircle, Phone, CalendarToday } from '@mui/icons-material'
 import {
@@ -74,7 +75,13 @@ const Pedidos = () => {
         fechaProduccionService.getAbiertas(),
       ])
       setPedidos(pedidosRes.data)
-      setClientes(clientesRes.data)
+      
+      // Ordenar clientes alfabéticamente por nombre
+      const clientesOrdenados = clientesRes.data.sort((a, b) => 
+        a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+      )
+      setClientes(clientesOrdenados)
+      
       setProductos(productosRes.data)
       setFechasAbiertas(fechasRes.data)
     } catch (error) {
@@ -339,20 +346,25 @@ const Pedidos = () => {
         <DialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal" required>
-                <InputLabel>Cliente</InputLabel>
-                <Select
-                  value={formData.cliente_id}
-                  onChange={(e) => setFormData({ ...formData, cliente_id: e.target.value })}
-                  label="Cliente"
-                >
-                  {clientes.map((cliente) => (
-                    <MenuItem key={cliente.id} value={cliente.id}>
-                      {cliente.nombre} - {cliente.telefono}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Autocomplete
+                options={clientes}
+                getOptionLabel={(option) => `${option.nombre} - ${option.telefono}`}
+                value={clientes.find(c => c.id === formData.cliente_id) || null}
+                onChange={(event, newValue) => {
+                  setFormData({ ...formData, cliente_id: newValue ? newValue.id : '' })
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Cliente"
+                    margin="normal"
+                    required
+                    placeholder="Buscar cliente..."
+                  />
+                )}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                noOptionsText="No se encontraron clientes"
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth margin="normal" required>
@@ -381,21 +393,26 @@ const Pedidos = () => {
           </Typography>
 
           {formData.detalle.map((item, index) => (
-            <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-              <FormControl sx={{ flex: 2 }}>
-                <InputLabel>Producto</InputLabel>
-                <Select
-                  value={item.producto_id}
-                  onChange={(e) => handleDetalleChange(index, 'producto_id', e.target.value)}
-                  label="Producto"
-                >
-                  {productos.map((producto) => (
-                    <MenuItem key={producto.id} value={producto.id}>
-                      {producto.nombre} - {formatCurrency(producto.precio)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+              <Box sx={{ flex: 2, minWidth: isMobile ? '100%' : 'auto' }}>
+                <Autocomplete
+                  options={productos}
+                  getOptionLabel={(option) => `${option.nombre} - ${formatCurrency(option.precio)}`}
+                  value={productos.find(p => p.id === item.producto_id) || null}
+                  onChange={(event, newValue) => {
+                    handleDetalleChange(index, 'producto_id', newValue ? newValue.id : '')
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Producto"
+                      placeholder="Buscar producto..."
+                    />
+                  )}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  noOptionsText="No se encontraron productos"
+                />
+              </Box>
               <TextField
                 label="Cantidad"
                 type="number"
@@ -403,7 +420,7 @@ const Pedidos = () => {
                 onChange={(e) =>
                   handleDetalleChange(index, 'cantidad', parseInt(e.target.value) || 1)
                 }
-                sx={{ width: 100 }}
+                sx={{ width: isMobile ? '100px' : 100 }}
                 inputProps={{ min: 1 }}
               />
               <IconButton
