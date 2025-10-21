@@ -1,6 +1,11 @@
 import axios from 'axios'
 
-// No configuramos baseURL porque el proxy de Vite maneja /api automáticamente
+// Configurar baseURL para producción
+const API_URL = import.meta.env.VITE_API_URL || ''
+
+if (import.meta.env.PROD && API_URL) {
+  axios.defaults.baseURL = API_URL
+}
 
 // Clientes
 export const clienteService = {
