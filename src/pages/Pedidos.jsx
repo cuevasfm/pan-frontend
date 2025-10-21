@@ -177,14 +177,14 @@ const Pedidos = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Pedidos
+          Pedido
         </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={handleOpenDialog}
         >
-          Nuevo Pedido
+          Nuevo Pedidosssssssss
         </Button>
       </Box>
 
@@ -198,6 +198,11 @@ const Pedidos = () => {
           {success}
         </Alert>
       )}
+
+      {/* DEBUG: Mostrar valor de isMobile */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        DEBUG - isMobile: {isMobile ? 'true' : 'false'} | Ancho ventana: {typeof window !== 'undefined' ? window.innerWidth : 'N/A'}px
+      </Alert>
 
       {/* Vista móvil - Cards */}
       {isMobile ? (
@@ -342,7 +347,7 @@ const Pedidos = () => {
 
       {/* Dialog para crear pedido */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Nuevo Pedido</DialogTitle>
+        <DialogTitle>Nuevo Pedidos</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
