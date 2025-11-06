@@ -183,7 +183,7 @@ const FechasProduccion = () => {
                       </Typography>
                       <Chip
                         label={fecha.abierta ? 'Abierta' : 'Cerrada'}
-                        color={fecha.abierta ? 'success' : 'default'}
+                        color={fecha.abierta ? 'success' : 'error'}
                         size="small"
                       />
                     </Box>
@@ -211,7 +211,7 @@ const FechasProduccion = () => {
                     <Button
                       size="small"
                       variant={fecha.abierta ? "contained" : "outlined"}
-                      color={fecha.abierta ? "success" : "default"}
+                      color={fecha.abierta ? "success" : "error"}
                       startIcon={<ToggleOn />}
                       onClick={() => handleToggle(fecha.id)}
                     >
@@ -267,7 +267,7 @@ const FechasProduccion = () => {
                     <TableCell>
                       <Chip
                         label={fecha.abierta ? 'Abierta' : 'Cerrada'}
-                        color={fecha.abierta ? 'success' : 'default'}
+                        color={fecha.abierta ? 'success' : 'error'}
                         size="small"
                       />
                     </TableCell>
