@@ -160,8 +160,18 @@ const PedidosEditable = () => {
 
   const handleDetalleChange = (index, field, value) => {
     const newDetalle = [...formData.detalle]
-    newDetalle[index][field] = value
-    
+
+    // Para cantidad, permitir valores vacíos temporalmente para mejor UX
+    if (field === 'cantidad') {
+      // Permitir string vacío o número válido
+      newDetalle[index][field] = value === '' ? '' : (parseInt(value) || 0)
+    } else if (field === 'precio_unitario') {
+      // Permitir string vacío o número válido para precio
+      newDetalle[index][field] = value === '' ? '' : (parseFloat(value) || 0)
+    } else {
+      newDetalle[index][field] = value
+    }
+
     // Si cambia el producto, actualizar el precio por defecto
     if (field === 'producto_id') {
       const producto = productos.find(p => p.id === parseInt(value))
@@ -169,13 +179,15 @@ const PedidosEditable = () => {
         newDetalle[index].precio_unitario = producto.precio
       }
     }
-    
+
     setFormData({ ...formData, detalle: newDetalle })
   }
 
   const calcularTotal = () => {
     return formData.detalle.reduce((sum, item) => {
-      return sum + (item.cantidad * item.precio_unitario)
+      const cantidad = parseFloat(item.cantidad) || 0
+      const precio = parseFloat(item.precio_unitario) || 0
+      return sum + (cantidad * precio)
     }, 0)
   }
 
@@ -620,8 +632,14 @@ const PedidosEditable = () => {
                       type="number"
                       value={item.cantidad}
                       onChange={(e) =>
-                        handleDetalleChange(index, 'cantidad', parseInt(e.target.value) || 1)
+                        handleDetalleChange(index, 'cantidad', e.target.value)
                       }
+                      onBlur={(e) => {
+                        // Al perder el foco, asegurar que haya un valor mínimo de 1
+                        if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                          handleDetalleChange(index, 'cantidad', 1)
+                        }
+                      }}
                       inputProps={{ min: 1 }}
                     />
                   </Grid>
@@ -632,8 +650,14 @@ const PedidosEditable = () => {
                       type="number"
                       value={item.precio_unitario}
                       onChange={(e) =>
-                        handleDetalleChange(index, 'precio_unitario', parseFloat(e.target.value) || 0)
+                        handleDetalleChange(index, 'precio_unitario', e.target.value)
                       }
+                      onBlur={(e) => {
+                        // Al perder el foco, asegurar que haya un valor mínimo de 0
+                        if (e.target.value === '' || parseFloat(e.target.value) < 0) {
+                          handleDetalleChange(index, 'precio_unitario', 0)
+                        }
+                      }}
                       InputProps={{
                         startAdornment: <InputAdornment position="start">$</InputAdornment>,
                       }}
@@ -643,7 +667,7 @@ const PedidosEditable = () => {
                   <Grid item xs={12} sm={2}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        Subtotal: {formatCurrency(item.cantidad * item.precio_unitario)}
+                        Subtotal: {formatCurrency((parseFloat(item.cantidad) || 0) * (parseFloat(item.precio_unitario) || 0))}
                       </Typography>
                       <IconButton
                         color="error"

@@ -137,7 +137,15 @@ const Pedidos = () => {
 
   const handleDetalleChange = (index, field, value) => {
     const newDetalle = [...formData.detalle]
-    newDetalle[index][field] = value
+
+    // Para cantidad, permitir valores vacíos temporalmente para mejor UX
+    if (field === 'cantidad') {
+      // Permitir string vacío o número válido
+      newDetalle[index][field] = value === '' ? '' : (parseInt(value) || 0)
+    } else {
+      newDetalle[index][field] = value
+    }
+
     setFormData({ ...formData, detalle: newDetalle })
   }
 
@@ -533,8 +541,14 @@ const Pedidos = () => {
                 type="number"
                 value={item.cantidad}
                 onChange={(e) =>
-                  handleDetalleChange(index, 'cantidad', parseInt(e.target.value) || 1)
+                  handleDetalleChange(index, 'cantidad', e.target.value)
                 }
+                onBlur={(e) => {
+                  // Al perder el foco, asegurar que haya un valor mínimo de 1
+                  if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                    handleDetalleChange(index, 'cantidad', 1)
+                  }
+                }}
                 sx={{ width: isMobile ? '100px' : 100 }}
                 inputProps={{ min: 1 }}
               />
