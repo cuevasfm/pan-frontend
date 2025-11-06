@@ -32,6 +32,7 @@ import {
   Logout,
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
+import ThemeSelector from './ThemeSelector'
 
 const drawerWidth = 260
 
@@ -124,7 +125,8 @@ const Layout = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Sistema de Gestión de Pedidos
           </Typography>
-          <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+          <ThemeSelector />
+          <IconButton onClick={handleMenuOpen} sx={{ p: 0, ml: 1 }}>
             <Avatar sx={{ bgcolor: 'secondary.main' }}>
               {user?.nombre?.charAt(0) || 'U'}
             </Avatar>
