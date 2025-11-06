@@ -32,7 +32,7 @@ import {
   Stack,
   Autocomplete,
 } from '@mui/material'
-import { Add, Visibility, Delete, RemoveCircle, Phone, CalendarToday } from '@mui/icons-material'
+import { Add, Visibility, Delete, RemoveCircle, Phone, CalendarToday, PersonAdd } from '@mui/icons-material'
 import {
   pedidoService,
   clienteService,
@@ -52,6 +52,7 @@ const Pedidos = () => {
   const [loading, setLoading] = useState(true)
   const [openDialog, setOpenDialog] = useState(false)
   const [openViewDialog, setOpenViewDialog] = useState(false)
+  const [openClienteDialog, setOpenClienteDialog] = useState(false)
   const [selectedPedido, setSelectedPedido] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -60,6 +61,12 @@ const Pedidos = () => {
     fecha_produccion_id: '',
     notas: '',
     detalle: [{ producto_id: '', cantidad: 1 }],
+  })
+  const [clienteFormData, setClienteFormData] = useState({
+    nombre: '',
+    telefono: '',
+    domicilio: '',
+    notas: '',
   })
 
   useEffect(() => {
@@ -172,6 +179,46 @@ const Pedidos = () => {
       loadData()
     } catch (error) {
       setError(error.response?.data?.message || 'Error actualizando estado')
+    }
+  }
+
+  const handleOpenClienteDialog = () => {
+    setClienteFormData({
+      nombre: '',
+      telefono: '',
+      domicilio: '',
+      notas: '',
+    })
+    setOpenClienteDialog(true)
+  }
+
+  const handleCloseClienteDialog = () => {
+    setOpenClienteDialog(false)
+  }
+
+  const handleCreateCliente = async () => {
+    try {
+      if (!clienteFormData.nombre || !clienteFormData.telefono) {
+        setError('Nombre y teléfono son requeridos')
+        return
+      }
+
+      const { data } = await clienteService.create(clienteFormData)
+      setSuccess('Cliente creado exitosamente')
+
+      // Recargar la lista de clientes
+      const clientesRes = await clienteService.getAll()
+      const clientesOrdenados = clientesRes.data.sort((a, b) =>
+        a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+      )
+      setClientes(clientesOrdenados)
+
+      // Seleccionar automáticamente el nuevo cliente
+      setFormData({ ...formData, cliente_id: data.id })
+
+      handleCloseClienteDialog()
+    } catch (error) {
+      setError(error.response?.data?.message || 'Error creando cliente')
     }
   }
 
@@ -402,25 +449,37 @@ const Pedidos = () => {
         <DialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <Autocomplete
-                options={clientes}
-                getOptionLabel={(option) => `${option.nombre} - ${option.telefono}`}
-                value={clientes.find(c => c.id === formData.cliente_id) || null}
-                onChange={(event, newValue) => {
-                  setFormData({ ...formData, cliente_id: newValue ? newValue.id : '' })
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Cliente"
-                    margin="normal"
-                    required
-                    placeholder="Buscar cliente..."
-                  />
-                )}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                noOptionsText="No se encontraron clientes"
-              />
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <Autocomplete
+                  fullWidth
+                  options={clientes}
+                  getOptionLabel={(option) => `${option.nombre} - ${option.telefono}`}
+                  value={clientes.find(c => c.id === formData.cliente_id) || null}
+                  onChange={(event, newValue) => {
+                    setFormData({ ...formData, cliente_id: newValue ? newValue.id : '' })
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Cliente"
+                      margin="normal"
+                      required
+                      placeholder="Buscar cliente..."
+                    />
+                  )}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  noOptionsText="No se encontraron clientes"
+                />
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleOpenClienteDialog}
+                  sx={{ mt: 2, minWidth: 'auto', px: 2 }}
+                  title="Nuevo Cliente"
+                >
+                  <PersonAdd />
+                </Button>
+              </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth margin="normal" required>
@@ -614,6 +673,55 @@ const Pedidos = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenViewDialog(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog para crear cliente */}
+      <Dialog open={openClienteDialog} onClose={handleCloseClienteDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Nuevo Cliente</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Nombre"
+            value={clienteFormData.nombre}
+            onChange={(e) => setClienteFormData({ ...clienteFormData, nombre: e.target.value })}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Teléfono"
+            value={clienteFormData.telefono}
+            onChange={(e) => setClienteFormData({ ...clienteFormData, telefono: e.target.value })}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Domicilio"
+            value={clienteFormData.domicilio}
+            onChange={(e) => setClienteFormData({ ...clienteFormData, domicilio: e.target.value })}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Notas"
+            value={clienteFormData.notas}
+            onChange={(e) => setClienteFormData({ ...clienteFormData, notas: e.target.value })}
+            margin="normal"
+            multiline
+            rows={2}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseClienteDialog}>Cancelar</Button>
+          <Button
+            onClick={handleCreateCliente}
+            variant="contained"
+            disabled={!clienteFormData.nombre || !clienteFormData.telefono}
+          >
+            Crear Cliente
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
