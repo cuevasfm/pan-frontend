@@ -30,7 +30,7 @@ import {
 } from '@mui/material'
 import { Add, Edit, Delete, ToggleOn, CalendarToday, EventBusy, Notes } from '@mui/icons-material'
 import { fechaProduccionService } from '../services/api'
-import { formatDate } from '../utils/formatters'
+import { formatDate, dateToInputValue, normalizeDateForBackend } from '../utils/formatters'
 
 const FechasProduccion = () => {
   const theme = useTheme()
@@ -69,8 +69,8 @@ const FechasProduccion = () => {
     if (fecha) {
       setFormData({
         id: fecha.id,
-        fecha_horneado: fecha.fecha_horneado.split('T')[0],
-        fecha_limite: fecha.fecha_limite.split('T')[0],
+        fecha_horneado: dateToInputValue(fecha.fecha_horneado),
+        fecha_limite: dateToInputValue(fecha.fecha_limite),
         abierta: fecha.abierta,
         notas: fecha.notas || '',
       })
@@ -92,11 +92,18 @@ const FechasProduccion = () => {
 
   const handleSubmit = async () => {
     try {
+      // Normalizar fechas antes de enviar al backend
+      const dataToSend = {
+        ...formData,
+        fecha_horneado: normalizeDateForBackend(formData.fecha_horneado),
+        fecha_limite: normalizeDateForBackend(formData.fecha_limite),
+      }
+
       if (formData.id) {
-        await fechaProduccionService.update(formData.id, formData)
+        await fechaProduccionService.update(formData.id, dataToSend)
         setSuccess('Fecha actualizada exitosamente')
       } else {
-        await fechaProduccionService.create(formData)
+        await fechaProduccionService.create(dataToSend)
         setSuccess('Fecha creada exitosamente')
       }
       loadFechas()

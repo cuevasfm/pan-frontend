@@ -63,3 +63,25 @@ export const getEstadoTexto = (estado) => {
   return textos[estado] || estado
 }
 
+// Convertir fecha ISO a formato YYYY-MM-DD para input type="date"
+// Extrae solo la parte de fecha sin considerar zona horaria
+export const dateToInputValue = (dateString) => {
+  if (!dateString) return ''
+  // Extraer solo la parte YYYY-MM-DD de cualquier formato de fecha
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Normalizar fecha de input type="date" a formato ISO con hora del mediodía
+// Esto evita problemas de zona horaria al enviar al backend
+export const normalizeDateForBackend = (dateString) => {
+  if (!dateString) return null
+  // Crear fecha con hora al mediodía para evitar cambios de día por zona horaria
+  const [year, month, day] = dateString.split('-')
+  const date = new Date(year, month - 1, day, 12, 0, 0)
+  return date.toISOString()
+}
+
