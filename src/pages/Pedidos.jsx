@@ -165,6 +165,16 @@ const Pedidos = () => {
     }
   }
 
+  const handleEstadoChange = async (pedidoId, nuevoEstado) => {
+    try {
+      await pedidoService.updateEstado(pedidoId, nuevoEstado)
+      setSuccess(`Estado actualizado a: ${getEstadoTexto(nuevoEstado)}`)
+      loadData()
+    } catch (error) {
+      setError(error.response?.data?.message || 'Error actualizando estado')
+    }
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -220,15 +230,33 @@ const Pedidos = () => {
               <Card key={pedido.id} elevation={2}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
                         Pedido #{pedido.id}
                       </Typography>
-                      <Chip
-                        label={getEstadoTexto(pedido.estado)}
-                        color={getEstadoColor(pedido.estado)}
-                        size="small"
-                      />
+                      <FormControl size="small" fullWidth sx={{ maxWidth: 200 }}>
+                        <Select
+                          value={pedido.estado}
+                          onChange={(e) => handleEstadoChange(pedido.id, e.target.value)}
+                          disabled={pedido.estado === 'cancelado'}
+                        >
+                          <MenuItem value="pendiente">
+                            <Chip label="Pendiente" color="warning" size="small" />
+                          </MenuItem>
+                          <MenuItem value="confirmado">
+                            <Chip label="Confirmado" color="info" size="small" />
+                          </MenuItem>
+                          <MenuItem value="en_preparacion">
+                            <Chip label="En Preparación" color="primary" size="small" />
+                          </MenuItem>
+                          <MenuItem value="entregado">
+                            <Chip label="Entregado" color="success" size="small" />
+                          </MenuItem>
+                          <MenuItem value="cancelado">
+                            <Chip label="Cancelado" color="error" size="small" />
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
                     </Box>
                     <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
                       {formatCurrency(pedido.total)}
@@ -313,11 +341,34 @@ const Pedidos = () => {
                     </TableCell>
                     <TableCell>{formatDate(pedido.fecha_horneado)}</TableCell>
                     <TableCell>
-                      <Chip
-                        label={getEstadoTexto(pedido.estado)}
-                        color={getEstadoColor(pedido.estado)}
-                        size="small"
-                      />
+                      <FormControl size="small" fullWidth>
+                        <Select
+                          value={pedido.estado}
+                          onChange={(e) => handleEstadoChange(pedido.id, e.target.value)}
+                          disabled={pedido.estado === 'cancelado'}
+                          sx={{
+                            '& .MuiSelect-select': {
+                              py: 0.5,
+                            },
+                          }}
+                        >
+                          <MenuItem value="pendiente">
+                            <Chip label="Pendiente" color="warning" size="small" />
+                          </MenuItem>
+                          <MenuItem value="confirmado">
+                            <Chip label="Confirmado" color="info" size="small" />
+                          </MenuItem>
+                          <MenuItem value="en_preparacion">
+                            <Chip label="En Preparación" color="primary" size="small" />
+                          </MenuItem>
+                          <MenuItem value="entregado">
+                            <Chip label="Entregado" color="success" size="small" />
+                          </MenuItem>
+                          <MenuItem value="cancelado">
+                            <Chip label="Cancelado" color="error" size="small" />
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
                     </TableCell>
                     <TableCell align="right">{formatCurrency(pedido.total)}</TableCell>
                     <TableCell align="right">
