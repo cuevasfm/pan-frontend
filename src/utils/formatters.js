@@ -6,20 +6,39 @@ export const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-// Formatear fecha
+// Formatear fecha sin conversión de zona horaria
 export const formatDate = (date) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString('es-MX', {
+
+  // Extraer solo la parte de fecha (YYYY-MM-DD) para evitar zona horaria
+  const dateOnly = date.split('T')[0]
+  const [year, month, day] = dateOnly.split('-')
+
+  // Crear fecha usando UTC para evitar conversión de zona horaria
+  const dateObj = new Date(Date.UTC(year, month - 1, day))
+
+  return dateObj.toLocaleDateString('es-MX', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC' // Forzar UTC para evitar conversión
   })
 }
 
-// Formatear fecha corta
+// Formatear fecha corta sin conversión de zona horaria
 export const formatDateShort = (date) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString('es-MX')
+
+  // Extraer solo la parte de fecha (YYYY-MM-DD) para evitar zona horaria
+  const dateOnly = date.split('T')[0]
+  const [year, month, day] = dateOnly.split('-')
+
+  // Crear fecha usando UTC para evitar conversión de zona horaria
+  const dateObj = new Date(Date.UTC(year, month - 1, day))
+
+  return dateObj.toLocaleDateString('es-MX', {
+    timeZone: 'UTC' // Forzar UTC para evitar conversión
+  })
 }
 
 // Formatear fecha y hora
@@ -64,24 +83,20 @@ export const getEstadoTexto = (estado) => {
 }
 
 // Convertir fecha ISO a formato YYYY-MM-DD para input type="date"
-// Extrae solo la parte de fecha sin considerar zona horaria
+// Extrae solo la parte de fecha SIN conversión de zona horaria
 export const dateToInputValue = (dateString) => {
   if (!dateString) return ''
-  // Extraer solo la parte YYYY-MM-DD de cualquier formato de fecha
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  // Extraer SOLO los primeros 10 caracteres (YYYY-MM-DD) sin conversión
+  // Esto evita problemas de zona horaria entre servidor y cliente
+  return dateString.split('T')[0]
 }
 
-// Normalizar fecha de input type="date" a formato ISO con hora del mediodía
-// Esto evita problemas de zona horaria al enviar al backend
+// Normalizar fecha de input type="date" para backend
+// Envía SOLO la fecha sin hora ni zona horaria
 export const normalizeDateForBackend = (dateString) => {
   if (!dateString) return null
-  // Crear fecha con hora al mediodía para evitar cambios de día por zona horaria
-  const [year, month, day] = dateString.split('-')
-  const date = new Date(year, month - 1, day, 12, 0, 0)
-  return date.toISOString()
+  // Enviar solo YYYY-MM-DD sin conversión de zona horaria
+  // El backend debe guardar como DATE, no TIMESTAMP
+  return dateString
 }
 
